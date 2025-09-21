@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q-Learning Visualization</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Q-Learning Algorithm Visualization</h1>
+            <p class="header-subtitle">Interactive demonstration of reinforcement learning in a grid world</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Grid World Section -->
+            <div class="grid-section">
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Grid World Environment</h3>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color agent-color"></div>
+                                <span>Agent</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color goal-color"></div>
+                                <span>Goal</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color obstacle-color"></div>
+                                <span>Obstacle</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color path-color"></div>
+                                <span>Path</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card__body">
+                        <div id="gridWorld" class="grid-world"></div>
+                        <p class="grid-instructions">Click on empty cells to add/remove obstacles. Click on agent or goal to move them.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="controls-section">
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Learning Parameters</h3>
+                    </div>
+                    <div class="card__body">
+                        <div class="control-group">
+                            <label for="learningRate">Learning Rate (α): <span id="learningRateValue">0.1</span></label>
+                            <input type="range" id="learningRate" min="0.1" max="1.0" step="0.1" value="0.1" class="slider">
+                        </div>
+                        <div class="control-group">
+                            <label for="discountFactor">Discount Factor (γ): <span id="discountFactorValue">0.9</span></label>
+                            <input type="range" id="discountFactor" min="0.1" max="1.0" step="0.1" value="0.9" class="slider">
+                        </div>
+                        <div class="control-group">
+                            <label for="epsilon">Epsilon (ε): <span id="epsilonValue">0.1</span></label>
+                            <input type="range" id="epsilon" min="0.1" max="1.0" step="0.1" value="0.1" class="slider">
+                        </div>
+                        <div class="control-group">
+                            <label for="speed">Animation Speed: <span id="speedValue">5</span></label>
+                            <input type="range" id="speed" min="1" max="10" step="1" value="5" class="slider">
+                        </div>
+                        
+                        <div class="button-group">
+                            <button id="startBtn" class="btn btn--primary">Start Learning</button>
+                            <button id="pauseBtn" class="btn btn--secondary" disabled>Pause</button>
+                            <button id="stepBtn" class="btn btn--outline">Step</button>
+                            <button id="resetBtn" class="btn btn--outline">Reset</button>
+                        </div>
+                        
+                        <div class="stats-display">
+                            <div class="stat-item">
+                                <span class="stat-label">Episode:</span>
+                                <span id="episodeCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Steps:</span>
+                                <span id="stepCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Total Reward:</span>
+                                <span id="totalReward">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Q-Table Section -->
+        <div class="qtable-section">
+            <div class="card">
+                <div class="card__header">
+                    <h3>Q-Table Visualization</h3>
+                    <p>Each cell shows Q-values for actions: ↑ ↓ ← →</p>
+                </div>
+                <div class="card__body">
+                    <div id="qTable" class="q-table"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Algorithm Info Section -->
+        <div class="algorithm-section">
+            <div class="card">
+                <div class="card__header">
+                    <h3>Algorithm Information</h3>
+                </div>
+                <div class="card__body">
+                    <div class="algorithm-info">
+                        <div class="equation">
+                            <h4>Q-Learning Update Rule:</h4>
+                            <div class="equation-display">
+                                Q(s,a) = Q(s,a) + α[r + γ·max Q(s',a') - Q(s,a)]
+                            </div>
+                        </div>
+                        
+                        <div class="current-values">
+                            <h4>Current Step Values:</h4>
+                            <div class="values-grid">
+                                <div class="value-item">
+                                    <span class="value-label">State (s):</span>
+                                    <span id="currentState">-</span>
+                                </div>
+                                <div class="value-item">
+                                    <span class="value-label">Action (a):</span>
+                                    <span id="currentAction">-</span>
+                                </div>
+                                <div class="value-item">
+                                    <span class="value-label">Reward (r):</span>
+                                    <span id="currentReward">-</span>
+                                </div>
+                                <div class="value-item">
+                                    <span class="value-label">Next State (s'):</span>
+                                    <span id="nextState">-</span>
+                                </div>
+                                <div class="value-item">
+                                    <span class="value-label">Policy:</span>
+                                    <span id="policyType">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="policy-explanation">
+                            <h4>Epsilon-Greedy Policy:</h4>
+                            <p>With probability ε, choose random action (exploration); otherwise choose action with highest Q-value (exploitation)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="statistics-section">
+            <div class="card">
+                <div class="card__header">
+                    <h3>Learning Statistics</h3>
+                </div>
+                <div class="card__body">
+                    <div class="chart-container" style="position: relative; height: 300px;">
+                        <canvas id="rewardChart"></canvas>
+                    </div>
+                    <div class="convergence-indicator">
+                        <span class="stat-label">Convergence Status:</span>
+                        <span id="convergenceStatus" class="status status--info">Learning...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
